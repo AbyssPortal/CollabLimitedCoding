@@ -11,7 +11,7 @@ const { is_token } = require('./is_token.js')
 
 
 
-const PORT = 3000;
+
 
 
 
@@ -22,8 +22,8 @@ let users = new Map()
 
 const file_whitelist = fs.readFileSync(path.join(__dirname, 'file_whitelist.txt'), 'utf-8').split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-
-// TODO if i ever finish this **switch to https** **asap**
+const PORT = 3000;
+//TODO https
 const server = http.createServer(handle_http_request);
 
 
