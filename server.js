@@ -186,7 +186,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('update_tokens', (data, callback) => {
-        if (socket.socket_data.username == undefined) {
+        if (socket.socket_data.username == undefined
+            || users.has(socket.socket_data.username) == false) {
             callback({ success: false, message: 'You must be signed in to update tokens' });
             return;
         }
@@ -290,7 +291,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('chat_message', (data) => {
-        if (!socket.socket_data.username) {
+        if (socket.socket_data.username == undefined
+            || users.has(socket.socket_data.username) == false) {
             socket.emit('chat_message', { message: 'You must be signed in to send messages' });
             return;
         }
@@ -300,7 +302,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('root_command', (data) => {
-        if (!socket.socket_data.username) {
+        if (socket.socket_data.username == undefined
+            || users.has(socket.socket_data.username) == false) {
             socket.emit('chat_message', { message: 'You must be signed in to use root features' });
             return;
         }
