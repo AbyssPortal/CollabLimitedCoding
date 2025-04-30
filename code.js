@@ -104,7 +104,7 @@ function fix_textbox_width(textbox) {
         return;
     }
     textbox.style.width = `${text.length}ch`;
-    if (text.endsWith(';') || text.startsWith('//')) {
+    if (text.endsWith(';') || text.endsWith('{') || text.endsWith('}')) {
         const br = document.createElement('br');
         textbox.parentElement.after(br);
     } else {
