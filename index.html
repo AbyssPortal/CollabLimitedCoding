@@ -47,6 +47,9 @@
                             remaining_changes = response.remaining_changes;
                             next_refresh = response.next_refresh
                             signed_in_ui(username);
+                            if (response.root) {
+                                document.getElementById('root_area').style.display = 'block';
+                            }
                         } else {
                             alert('Sign in failed: ' + response.message);
                         }
@@ -105,13 +108,29 @@
                     }
                 });
             </script>
-            <br/>
-            <div id="chat_messages" class=".chat-container" >
+            <br />
+            <div id="chat_messages" class=".chat-container">
             </div>
 
         </div>
+    </div>
+    <div id="root_area" style="display: none;">
+        <h2>Root Area</h2>
+        <div id="root_area_content">
+            <input type="text" id="root_input" placeholder="Type here...">
+            <script>
+                document.getElementById('root_input').addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        const message = event.target.value;
+                        socket.emit('root_command', { message });
+                        event.target.value = ''; // Clear the input field
+                    }
+                });
+            </script>
+        </div>
+    </div>
 
-        <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
             <script>
                 const socket = io();
             </script>

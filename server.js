@@ -192,6 +192,11 @@ io.on('connection', (socket) => {
         }
         user = users.get(socket.socket_data.username);
         fix_remaining_changes(user)
+        if (user.remaining_changes <= 0) {
+            const message = `You have no remaining changes. Please wait until your next refresh.`;
+            callback({ success: false, message, remaining_changes: user.remaining_changes, next_refresh: user.next_refresh });
+            return;
+        }
         tokens_lock.write.lock();
         console.log(JSON.stringify(tokens))
         const hash = SHA256(JSON.stringify(tokens));
@@ -228,7 +233,7 @@ io.on('connection', (socket) => {
 
     })
 
-    
+
 
 
 
@@ -250,15 +255,16 @@ io.on('connection', (socket) => {
                 username: data.username,
                 root: false
             });
-            console.log('registered:', data.username,{ salt: salt, password_salt_hash: SHA256(data.password + salt) });
+            console.log('registered:', data.username, { salt: salt, password_salt_hash: SHA256(data.password + salt) });
             callback({
                 success: true,
                 message: 'Registration successful',
                 remaining_changes: 10,
                 next_refresh: Date.now() + 1000 * 60
             });
+            socket.socket_data.username = data.username.toLowerCase();
+
         }
-        socket.socket_data.username = data.username;
     });
     socket.on('sign_in', (data, callback) => {
         if (!users.has(data.username.toLowerCase())) {
@@ -270,7 +276,7 @@ io.on('connection', (socket) => {
                 return;
             }
             fix_remaining_changes(user_data)
-            socket.socket_data.username = user_data.username;
+            socket.socket_data.username = data.username.toLowerCase();
 
             callback({
                 success: true,
@@ -292,6 +298,74 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('chat_message', { message: `<${socket.socket_data.username}>:  ${data.message}` });
         socket.emit('chat_message', { message: `<${socket.socket_data.username}>:  ${data.message}` });
     });
+
+    socket.on('root_command', (data) => {
+        if (!socket.socket_data.username) {
+            socket.emit('chat_message', { message: 'You must be signed in to use root features' });
+            return;
+        }
+        if (!(users.get(socket.socket_data.username).root)) {
+            socket.emit('chat_message', { message: 'You must be a root user to use this command' });
+            return;
+        }
+        const words = data.message.split(' ');
+        // one word commands
+        if (words.length == 1) {
+            switch (words[0]) {
+                case 'save':
+                    saveData();
+                    socket.emit('chat_message', { message: 'Data saved successfully' });
+                    socket.broadcast.emit('chat_message', { message: 'Data saved successfully' });
+                    break;
+                case 'list_users':
+                    let user_list = 'Users: ';
+                    for (const [key, value] of users.entries()) {
+                        user_list += `${key} (${value.root ? 'root' : 'user'}) `;
+                    }
+                    socket.emit('chat_message', { message: user_list });
+                    break;
+            }
+            return;
+        }
+
+        if (words.length < 2) {
+            socket.emit('chat_message', { message: 'Invalid command' });
+            return;
+        }
+        switch (words[0]) {
+            case 'add_root':
+                if (users.has(words[1])) {
+                    users.get(words[1]).root = true;
+                    socket.emit('chat_message', { message: `User ${words[1]} is now a root user` });
+                    socket.broadcast.emit('chat_message', { message: `User ${words[1]} is now a root user` });
+                } else {
+                    socket.emit('chat_message', { message: `User ${words[1]} not found` });
+                }
+                break;
+            case 'remove_root':
+                if (users.has(words[1])) {
+                    users.get(words[1]).root = false;
+                    socket.emit('chat_message', { message: `User ${words[1]} is no longer a root user` });
+                    socket.broadcast.emit('chat_message', { message: `User ${words[1]} is no longer a root user` });
+                } else {
+                    socket.emit('chat_message', { message: `User ${words[1]} not found` });
+                }
+                break;
+
+            case 'kill_user':
+                if (users.has(words[1])) {
+                    socket.emit('chat_message', { message: `User ${words[1]} has been killed` });
+                    users.delete(words[1]);
+                } else {
+                    socket.emit('chat_message', { message: `User ${words[1]} not found` });
+                }
+                break;
+
+            default:
+                socket.emit('chat_message', { message: 'Invalid command' });
+        }
+
+    })
 
 });
 
@@ -382,8 +456,11 @@ function saveData() {
 
 // Load users and tokens on startup
 try {
+
     if (fs.existsSync(path.join(__dirname, 'tokens.json'))) {
+        tokens_lock.write.lock();
         tokens = JSON.parse(fs.readFileSync(path.join(__dirname, 'tokens.json')));
+        tokens_lock.write.unlock();
     }
     if (fs.existsSync(path.join(__dirname, 'users.json'))) {
         users = new Map(JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'))));
