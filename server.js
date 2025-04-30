@@ -26,7 +26,14 @@ const PORT = 3000;
 //TODO https
 const server = http.createServer(handle_http_request);
 
+function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    return date.toISOString().replace('T', ' ').split('.')[0];
+}
 
+console.log = ((log) => (...args) => {
+    log(formatDate(Date.now()), ':', ...args);
+})(console.log);
 
 function handle_http_request(req, res) {
     if (req.method === 'GET') {
@@ -212,7 +219,7 @@ io.on('connection', (socket) => {
 
     })
 
-
+    
 
 
 
