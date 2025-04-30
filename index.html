@@ -30,14 +30,12 @@
                     document.getElementById('authSection').style.display = 'none';
                     document.getElementById('signedInSection').style.display = 'block';
                     document.getElementById('usernameDisplay').innerText = username;
-
-                    document.getElementById('changesSection').style.display = 'block';
                     document.getElementById('remaining_changes').innerText = 'Remaining Changes: ' + remaining_changes;
                     setTimeout(() => {
                         setInterval(check_refreshes, 250);
 
                     }, (next_refresh - Date.now) % 1000 + 10); // start the timer 10 seconds after the next second tick
-                    document.getElementById('tokens_home').style.display = 'block';
+                    document.getElementById('main_container').style.display = 'flex';
                 }
                 document.getElementById('signInButton').addEventListener('click', () => {
                     const username = document.getElementById('username').value;
@@ -82,30 +80,49 @@
 
     </div>
 
-    <div id="changesSection" style="display: none;">
-        <label id="remaining_changes">Remaining Changes: undefined</label>
-        <label>, </label>
-        <label id="next_refresh">Next Refresh: undefined</label>
-    </div>
 
 
-    <div id="tokens_home" style="display: none;">
+
+    <div id="main_container" style="display: flex; display: none;">
+        <div id="coding_area" style=" width: 75%;">
+            <div id="changesSection">
+                <label id="remaining_changes">Remaining Changes: undefined</label>
+                <label>, </label>
+                <label id="next_refresh">Next Refresh: undefined</label>
+            </div>
+            <div id="tokens_home"></div>
+        </div>
+
+        <div id="chat_room" style=" width: 25%; padding-left: 10px;">
+            <h3>Chat Room</h3>
+            <input type="text" id="chatInput" placeholder="Type your message here...">
+            <script>
+                document.getElementById('chatInput').addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        const message = event.target.value;
+                        socket.emit('chat_message', { message });
+                        event.target.value = ''; // Clear the input field
+                    }
+                });
+            </script>
+            <br/>
+            <div id="chat_messages" class=".chat-container" >
+            </div>
+
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+            <script>
+                const socket = io();
+            </script>
+            <script src="sha256.js"></script>
+            <script src="is_token.js"></script>
+            <script src="code.js"></script>
 
 
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-    </script>
-    <script src="sha256.js"></script>
-    <script src="is_token.js"></script>
-    <script src="code.js"></script>
-
-
-    <form>
-        <!-- <button type="button" id="sendTokensButton">Send Tokens</button> -->
-    </form>
+            <form>
+                <!-- <button type="button" id="sendTokensButton">Send Tokens</button> -->
+            </form>
 </body>
 
 </html>

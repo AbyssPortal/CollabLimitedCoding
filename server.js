@@ -259,7 +259,18 @@ io.on('connection', (socket) => {
         socket.socket_data.username = data.username;
     });
 
+    socket.on('chat_message', (data) => {
+        if (!socket.socket_data.username) {
+            socket.emit('chat_message', { message: 'You must be signed in to send messages' });
+            return;
+        }
+        console.log('Chat message from', socket.socket_data.username, ':', data.message);
+        socket.broadcast.emit('chat_message', { message: `<${socket.socket_data.username}>:  ${data.message}` });
+        socket.emit('chat_message', { message: `<${socket.socket_data.username}>:  ${data.message}` });
+    });
+
 });
+
 
 
 function interpretChange(change) {

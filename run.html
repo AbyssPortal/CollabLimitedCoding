@@ -16,7 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/js.min.js"></script>
     <script src="acorn/acorn.js"></script>
     <script src="acorn/interpreter.js"></script>
-
+    <link rel="stylesheet" href="atom-one-dark-reasonable.css">
 
     <script>
         var interpreter;
@@ -41,6 +41,7 @@
                             }
                         }
                     }, 100);
+                    document.getElementById('runButton').style.display = 'none';
                 });
                 document.getElementById('runButton').style.display = 'block';
 
@@ -64,6 +65,9 @@
         var print = function (text) {
             const output = document.getElementById('console_output');
             output.innerHTML += "<$>: " + text + '<br>'; // Add a line break
+            while (output.childElementCount > 20) {
+                output.removeChild(output.childNodes[0]);
+            }
         };
 
         var input_stack = []

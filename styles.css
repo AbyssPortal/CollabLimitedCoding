@@ -49,3 +49,13 @@ body {
   pointer-events: none; /* Prevent interaction */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
+
+.chat-container {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.chat-message {
+  word-break: break-word;
+  hyphens: auto;
+}

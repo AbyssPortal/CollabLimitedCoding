@@ -10,6 +10,8 @@ socket.on('connect', () => {
 
 socket.on('disconnect', () => {
     console.log('Disconnected from server');
+    alert('Disconnected from server. Refreshing the page...');
+    location.reload();
 });
 
 const tokensHome = document.getElementById('tokens_home');
@@ -29,6 +31,17 @@ socket.on('update_tokens', (data) => {
         interpretChange(data.change);
     }
 })
+
+socket.on('chat_message', (data) => {
+    const chatMessages = document.getElementById('chat_messages');
+    const newMessage = document.createElement('div');
+    newMessage.textContent = data.message;
+    newMessage.className = 'chat-message';
+    chatMessages.appendChild(newMessage);
+    while (chatMessages.childElementCount > 20) {
+        chatMessages.removeChild(chatMessages.childNodes[0]);
+    }
+});
 
 
 
