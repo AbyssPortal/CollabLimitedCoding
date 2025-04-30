@@ -218,18 +218,23 @@ io.on('connection', (socket) => {
 
     //todo: make this have less than 8 bijillion vulnerabilities
     socket.on('register', (data, callback) => {
-        if (users.has(data.username)) {
-            socket.emit('register_response', { success: false, message: 'Username already taken' });
+        if (data.username.length < 3) {
+            callback({ success: false, message: 'Username must be at least 3 characters long' });
+            return;
+        }
+        if (users.has(data.username.toLowerCase())) {
             callback({ success: false, message: 'Username already taken' });
         } else {
             salt = Math.floor(Math.random() * 1000000);
-            users.set(data.username, {
+            users.set(data.username.toLowerCase(), {
                 salt: salt,
                 password_salt_hash: SHA256(data.password + salt),
                 remaining_changes: 10,
-                next_refresh: Date.now() + 1000 * 60
+                next_refresh: Date.now() + 1000 * 60,
+                username: data.username,
+                root: false
             });
-            // console.log('registered:', data.username,{ salt: salt, password_salt_hash: SHA256(data.password + salt) });
+            console.log('registered:', data.username,{ salt: salt, password_salt_hash: SHA256(data.password + salt) });
             callback({
                 success: true,
                 message: 'Registration successful',
@@ -240,15 +245,17 @@ io.on('connection', (socket) => {
         socket.socket_data.username = data.username;
     });
     socket.on('sign_in', (data, callback) => {
-        if (!users.has(data.username)) {
+        if (!users.has(data.username.toLowerCase())) {
             callback({ success: false, message: 'Username not in use' });
         } else {
-            user_data = users.get(data.username);
+            user_data = users.get(data.username.toLowerCase());
             if (SHA256(data.password + user_data.salt) != user_data.password_salt_hash) {
                 callback({ success: false, message: 'Incorrect password' });
                 return;
             }
             fix_remaining_changes(user_data)
+            socket.socket_data.username = user_data.username;
+
             callback({
                 success: true,
                 message: 'Sign in successful',
@@ -256,7 +263,7 @@ io.on('connection', (socket) => {
                 next_refresh: user_data.next_refresh
             });
         }
-        socket.socket_data.username = data.username;
+
     });
 
     socket.on('chat_message', (data) => {
