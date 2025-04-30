@@ -213,7 +213,13 @@ function createTokenTextbox(text = '', id = undefined) {
             fix_textbox_width(textbox);
 
             textbox.blur();
-
+            if (!is_token(value)) {
+                textbox.style.backgroundColor = 'rgb(255, 127, 127)';
+                setTimeout(() => {
+                    textbox.style.backgroundColor = '';
+                }, 750);
+                return;
+            }
             if (!try_use_change()) {
                 return;
             }
@@ -396,7 +402,7 @@ socket.on('focus_token', (data) => {
             if (bubble.dataset.timeout) {
                 clearTimeout(bubble.dataset.timeout);
             }
-            bubble.dataset.timeout =            setTimeout(() => {
+            bubble.dataset.timeout = setTimeout(() => {
                 if (bubble.textContent == data.username) {
                     bubble.style.display = 'none';
                 }

@@ -6,10 +6,8 @@ const { Server: SocketServer } = require("socket.io");
 const express = require('express')
 const { SHA256 } = require('./sha256');
 const beautify = require('js-beautify/js').js
+const { is_token } = require('./is_token.js')
 
-
-
-const app = express();
 
 
 
@@ -28,9 +26,6 @@ const file_whitelist = fs.readFileSync(path.join(__dirname, 'file_whitelist.txt'
 // TODO if i ever finish this **switch to https** **asap**
 const server = http.createServer(handle_http_request);
 
-app.get('/', (req, res) => {
-    handle_http_request(req, res);
-});
 
 
 function handle_http_request(req, res) {
@@ -209,11 +204,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('focus_token', (data) => {
-        socket.broadcast.emit('focus_token', {where: data.where, username: socket.socket_data.username});
+        socket.broadcast.emit('focus_token', { where: data.where, username: socket.socket_data.username });
     })
 
     socket.on('focus_remove', (data) => {
-        socket.broadcast.emit('focus_remove', {where: data.where, username: socket.socket_data.username});
+        socket.broadcast.emit('focus_remove', { where: data.where, username: socket.socket_data.username });
 
     })
 
@@ -280,6 +275,10 @@ function interpretChange(change) {
         case 'edit_element':
             if (change.where >= tokens.length || change.where < 0) {
                 console.error('Invalid index:', change.where);
+                return false;
+            }
+            if (!is_token(change.to)) {
+                console.error('Invalid token:', change.to);
                 return false;
             }
             tokens[change.where] = change.to;
