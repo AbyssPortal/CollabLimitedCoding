@@ -324,6 +324,11 @@ function interpretChanges(changes_list) {
     return true;
 }
 
+
+setInterval(() => {
+    saveData();
+    console.log('Auto-saving data...');
+}, interval = 1000 * 60 * 15);
 // Save users and tokens on process exit
 process.on('exit', () => {
     saveData();
