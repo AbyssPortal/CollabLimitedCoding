@@ -311,6 +311,7 @@ io.on('connection', (socket) => {
             socket.emit('chat_message', { message: 'You must be a root user to use this command' });
             return;
         }
+        console.log('Root command from', socket.socket_data.username, ':', data.message);
         const words = data.message.split(' ');
         // one word commands
         if (words.length == 1) {
