@@ -186,8 +186,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('update_tokens', (data, callback) => {
-        if (socket.socket_data.username == undefined
-            || users.has(socket.socket_data.username) == false) {
+        if (!check_signed_in_well()) {
             callback({ success: false, message: 'You must be signed in to update tokens' });
             return;
         }
@@ -226,11 +225,19 @@ io.on('connection', (socket) => {
     });
 
     socket.on('focus_token', (data) => {
-        socket.broadcast.emit('focus_token', { where: data.where, username: socket.socket_data.username });
+        if (!check_signed_in_well()) {
+            socket.emit('restart', { message: 'You must be signed in to use focus tokens' });
+            return;
+        }
+        socket.broadcast.emit('focus_token', { where: data.where, username: users.get(socket.socket_data.username).username });
     })
 
     socket.on('focus_remove', (data) => {
-        socket.broadcast.emit('focus_remove', { where: data.where, username: socket.socket_data.username });
+        if (!check_signed_in_well()) {
+            socket.emit('restart', { message: 'You must be signed in to use focus tokens' });
+            return;
+        }
+        socket.broadcast.emit('focus_remove', { where: data.where, username: users.get(socket.socket_data.username).username });
 
     })
 
@@ -255,7 +262,7 @@ io.on('connection', (socket) => {
                 next_refresh: Date.now() + 1000 * 60,
                 username: data.username,
                 root: false
-            });
+            }); // THE KEY IS LOWERCASE, THE USERNAME VALUE IS THE USER'S DESIRED CASE
             console.log('registered:', data.username, { salt: salt, password_salt_hash: SHA256(data.password + salt) });
             callback({
                 success: true,
@@ -291,8 +298,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('chat_message', (data) => {
-        if (socket.socket_data.username == undefined
-            || users.has(socket.socket_data.username) == false) {
+        if (!check_signed_in_well()) {
             socket.emit('chat_message', { message: 'You must be signed in to send messages' });
             return;
         }
@@ -301,9 +307,19 @@ io.on('connection', (socket) => {
         socket.emit('chat_message', { message: `<${socket.socket_data.username}>:  ${data.message}` });
     });
 
+    function check_signed_in_well() {
+        if (socket.socket_data.username == undefined) {
+            return false;
+        }
+        if (users.has(socket.socket_data.username) == false) {
+            socket.send('restart', { message: 'You must be signed in to use this feature' });
+            return false;
+        }
+        return true;
+    }
+
     socket.on('root_command', (data) => {
-        if (socket.socket_data.username == undefined
-            || users.has(socket.socket_data.username) == false) {
+        if (!check_signed_in_well()) {
             socket.emit('chat_message', { message: 'You must be signed in to use root features' });
             return;
         }
@@ -394,7 +410,7 @@ io.on('connection', (socket) => {
         }
         //#endregion command functions
 
-        const commands = 
+        const commands =
         {
             save: { name: 'save', min_args: 1, func: save, description: 'Save the current state. usage: save' },
             list_users: { name: 'list_users', min_args: 1, func: list_users, description: 'List all users. usage: list_users' },

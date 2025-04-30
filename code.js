@@ -453,6 +453,11 @@ socket.on('focus_token', (data) => {
     }
 })
 
+socket.on('restart', (data) => {
+    alert('Server is requsting you to restart. Refreshing the page...');
+    location.reload();
+})
+
 socket.on('focus_remove', (data) => {
     const count = data.where;
     const container = get_nth_token(count);
