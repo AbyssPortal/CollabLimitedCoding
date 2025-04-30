@@ -266,9 +266,7 @@ function createTokenTextbox(text = '', id = undefined) {
 
                     send_tokens_change({ type: 'create_element', where: count }).then((res) => {
                         if (res == true) {
-                            const new_container = createTokenTextbox();
-                            container.parentNode.insertBefore(new_container, container.nextSibling);
-                            new_container.firstChild.focus();
+                            create_container_after(container);
                         }
                     })
                 }
@@ -294,19 +292,37 @@ function createTokenTextbox(text = '', id = undefined) {
             return;
         }
 
-        const count = Array.from(container.parentNode.children).indexOf(container);
+        const count = count_location(container);
         console.log('Elements before this one:', count);
         send_tokens_change({ type: 'create_element', where: count })
             .then((res) => {
                 if (res == true) {
-                    const new_container = createTokenTextbox();
-                    container.parentNode.insertBefore(new_container, container.nextSibling);
+                    create_container_after(container);
                 }
             });
 
     });
 
     return container;
+}
+
+function create_container_after(container) {
+    const new_container = createTokenTextbox();
+    fix_textbox_width(new_container.firstChild);
+    let next_non_break = container.nextSibling;
+    while (next_non_break && next_non_break.tagName === 'BR') {
+        if (!next_non_break.nextSibling) {
+            container.parentNode.appendChild(new_container);
+            next_non_break = null;
+            break;
+        }
+        next_non_break = next_non_break.nextSibling;
+
+    }
+    if (next_non_break) {
+        container.parentNode.insertBefore(new_container, next_non_break);
+    }
+    new_container.firstChild.focus();
 }
 
 function get_nth_token(n) {
@@ -319,8 +335,7 @@ function interpretChange(change) {
         case 'create_element': {
             let element = get_nth_token(change.where);
             if (element) {
-                const new_container = createTokenTextbox();
-                element.parentNode.insertBefore(new_container, element.nextSibling);
+                create_container_after(element);
             }
         }
             break;
