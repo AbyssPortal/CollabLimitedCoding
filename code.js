@@ -17,7 +17,19 @@ socket.on('disconnect', () => {
 const tokensHome = document.getElementById('tokens_home');
 
 
+refresh_config = {
+    'refresh_rate': 1000 * 60,
+    'max_tokens': 10
+}
 
+fetch('/refresh_config.json').then(response => {
+    if (response.ok) {
+        refresh_config = response.json();
+    } else {
+        console.error('Failed to fetch refresh_config.json');
+        return null;
+    }
+})
 
 socket.on('update_tokens', (data) => {
     console.log('Received update_tokens:', data);
@@ -382,12 +394,13 @@ function millisecondsToTimeFormat(milliseconds) {
 const next_refresh_label = document.getElementById('next_refresh');
 
 
+
 function check_refreshes() {
     while (next_refresh < Date.now()) {
-        next_refresh = Date.now() + 1000 * 60;
+        next_refresh = Date.now() + refresh_config.refresh_rate;
         remaining_changes++
-        if (remaining_changes > 10) {
-            remaining_changes = 10;
+        if (remaining_changes > refresh_config.max_tokens) {
+            remaining_changes = refresh_config.max_tokens;
         }
     }
     // console.log("next_refresh ", next_refresh)

@@ -8,3 +8,4 @@ acorn/acorn.js
 acorn/interpreter.js
 is_token.js
 atom-one-dark-reasonable.css
+refresh_config.json

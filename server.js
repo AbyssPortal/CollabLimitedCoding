@@ -18,6 +18,10 @@ const { is_token } = require('./is_token.js')
 
 let tokens_lock = new RW()
 tokens = ['']
+refresh_config = {
+    'refresh_rate': 1000 * 60,
+    'max_tokens': 10
+}
 let users = new Map()
 
 const file_whitelist = fs.readFileSync(path.join(__dirname, 'file_whitelist.txt'), 'utf-8').split('\n').map(line => line.trim()).filter(line => line.length > 0);
@@ -166,10 +170,10 @@ function fix_remaining_changes(user) {
     }
     while (user.next_refresh < Date.now()) {
         user.remaining_changes++;
-        user.next_refresh += 1000 * 60;
+        user.next_refresh += refresh_config.refresh_rate;
     }
-    if (user.remaining_changes > 10) {
-        user.remaining_changes = 10;
+    if (user.remaining_changes > refresh_config.max_tokens) {
+        user.remaining_changes = refresh_config.max_tokens;
     }
 }
 
@@ -272,7 +276,8 @@ io.on('connection', (socket) => {
                 success: true,
                 message: 'Sign in successful',
                 remaining_changes: user_data.remaining_changes,
-                next_refresh: user_data.next_refresh
+                next_refresh: user_data.next_refresh,
+                root: user_data.root
             });
         }
 
@@ -382,6 +387,9 @@ try {
     }
     if (fs.existsSync(path.join(__dirname, 'users.json'))) {
         users = new Map(JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'))));
+    }
+    if (fs.existsSync(path.join(__dirname, 'refresh_config.json'))) {
+        refresh_config = JSON.parse(fs.readFileSync(path.join(__dirname, 'refresh_config.json')));
     }
     console.log('Data loaded successfully.');
 } catch (error) {
