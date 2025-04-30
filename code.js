@@ -22,13 +22,13 @@ refresh_config = {
     'max_tokens': 10
 }
 
-fetch('/refresh_config.json').then(response => {
-    if (response.ok) {
-        refresh_config = response.json();
-    } else {
-        console.error('Failed to fetch refresh_config.json');
-        return null;
-    }
+fetch('/refresh_config.json').then(response => response.json()).then(data => {
+
+    refresh_config = data;
+
+}).catch(error => {
+    console.error('Error fetching refresh config:', error);
+    alert('Error fetching refresh config. Please try again later.');
 })
 
 socket.on('update_tokens', (data) => {
