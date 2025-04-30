@@ -22,7 +22,7 @@ let tokens_lock = new RW()
 tokens = ['']
 let users = new Map()
 
-const file_whitelist = ['index.html', 'styles.css', 'code.js', 'sha256.js', 'run.html'];
+const file_whitelist = fs.readFileSync(path.join(__dirname, 'file_whitelist.txt'), 'utf-8').split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
 
 // TODO if i ever finish this **switch to https** **asap**
@@ -84,7 +84,10 @@ function handle_http_request(req, res) {
                 contentType = 'image/gif';
                 break;
         }
-        if (!file_whitelist.includes(path.basename(filePath))) {
+        const relativePath = path.relative(__dirname, filePath);
+        if (!file_whitelist.includes(relativePath)) {
+            console.log('Forbidden file:', relativePath);
+
             res.writeHead(403, { 'Content-Type': 'text/plain' });
             res.end('Forbidden');
             return;
