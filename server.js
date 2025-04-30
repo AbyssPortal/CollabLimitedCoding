@@ -314,87 +314,108 @@ io.on('connection', (socket) => {
         console.log('Root command from', socket.socket_data.username, ':', data.message);
         const words = data.message.split(' ');
         // one word commands
-        if (words.length == 1) {
-            switch (words[0]) {
-                case 'save':
-                    saveData();
-                    socket.emit('chat_message', { message: 'Data saved successfully' });
-                    socket.broadcast.emit('chat_message', { message: 'Data saved successfully' });
-                    break;
-                case 'list_users':
-                    let user_list = 'Users: ';
-                    for (const [key, value] of users.entries()) {
-                        user_list += `${key} (${value.root ? 'root' : 'user'}) `;
-                    }
-                    socket.emit('chat_message', { message: user_list });
-                    break;
-            }
-            return;
-        }
 
-        if (words.length < 2) {
+
+
+
+        if (words.length < 1) {
             socket.emit('chat_message', { message: 'Invalid command' });
             return;
         }
-        switch (words[0]) {
-            case 'add_root':
-                if (users.has(words[1])) {
-                    users.get(words[1]).root = true;
-                    socket.emit('chat_message', { message: `User ${words[1]} is now a root user` });
-                    socket.broadcast.emit('chat_message', { message: `User ${words[1]} is now a root user` });
-                } else {
-                    socket.emit('chat_message', { message: `User ${words[1]} not found` });
-                }
-                break;
-            case 'remove_root':
-                if (users.has(words[1])) {
-                    users.get(words[1]).root = false;
-                    socket.emit('chat_message', { message: `User ${words[1]} is no longer a root user` });
-                    socket.broadcast.emit('chat_message', { message: `User ${words[1]} is no longer a root user` });
-                } else {
-                    socket.emit('chat_message', { message: `User ${words[1]} not found` });
-                }
-                break;
 
-            case 'kill_user':
-                if (users.has(words[1])) {
-                    socket.emit('chat_message', { message: `User ${words[1]} has been killed` });
-                    users.delete(words[1]);
-                } else {
-                    socket.emit('chat_message', { message: `User ${words[1]} not found` });
-                }
-                break;
-            case 'set_refresh_rate':
-                {
-                    if (isNaN(words[1])) {
-                        socket.emit('chat_message', { message: `Invalid refresh rate` });
-                        return;
-                    }
-                    refresh_config.refresh_rate = parseInt(words[1]);
-                    refresh_config.refresh_rate = Math.max(refresh_config.refresh_rate, 1000);
-                    const response_message = `Refresh rate set to ${refresh_config.refresh_rate} ms. You may need to refresh`;
-                    socket.emit('chat_message', { message: response_message });
-                    socket.broadcast.emit('chat_message', { message: `Refresh rate set to ${refresh_config.refresh_rate} ms. You may need to refresh` });
-                }
-                break;
-
-            case 'set_max_tokens':
-                {
-                    if (isNaN(words[1])) {
-                        socket.emit('chat_message', { message: `Invalid max tokens` });
-                        return;
-                    }
-                    refresh_config.max_tokens = parseInt(words[1]);
-                    refresh_config.max_tokens = Math.max(refresh_config.max_tokens, 1);
-                    const response_message = `Max stored changes set to ${refresh_config.max_tokens}. You may need to refresh`;
-                    socket.emit('chat_message', { message: response_message });
-                    socket.broadcast.emit('chat_message', { message: response_message });
-                }
-                break;
-            default:
-                socket.emit('chat_message', { message: 'Invalid command' });
+        //#region command functions
+        function save(words) {
+            saveData();
+            socket.emit('chat_message', { message: 'Data saved successfully' });
         }
+        function list_users(words) {
+            let user_list = 'Users: ';
+            for (const [key, value] of users.entries()) {
+                user_list += `${key} (${value.root ? 'root' : 'user'}) `;
+            }
+            socket.emit('chat_message', { message: user_list });
+        }
+        function add_root(words) {
+            if (users.has(words[1])) {
+                users.get(words[1]).root = true;
+                socket.emit('chat_message', { message: `User ${words[1]} is now a root user` });
+                socket.broadcast.emit('chat_message', { message: `User ${words[1]} is now a root user` });
+            } else {
+                socket.emit('chat_message', { message: `User ${words[1]} not found` });
+            }
+        }
+        function remove_root(words) {
+            if (users.has(words[1])) {
+                users.get(words[1]).root = false;
+                socket.emit('chat_message', { message: `User ${words[1]} is no longer a root user` });
+                socket.broadcast.emit('chat_message', { message: `User ${words[1]} is no longer a root user` });
+            } else {
+                socket.emit('chat_message', { message: `User ${words[1]} not found` });
+            }
+        }
+        function kill_user(words) {
+            if (users.has(words[1])) {
+                socket.emit('chat_message', { message: `User ${words[1]} has been killed` });
+                users.delete(words[1]);
+            } else {
+                socket.emit('chat_message', { message: `User ${words[1]} not found` });
+            }
+        }
+        function set_refresh_rate(words) {
+            {
+                if (isNaN(words[1])) {
+                    socket.emit('chat_message', { message: `Invalid refresh rate` });
+                    return;
+                }
+                refresh_config.refresh_rate = parseInt(words[1]);
+                refresh_config.refresh_rate = Math.max(refresh_config.refresh_rate, 1000);
+                const response_message = `Refresh rate set to ${refresh_config.refresh_rate} ms. You may need to refresh`;
+                socket.emit('chat_message', { message: response_message });
+                socket.broadcast.emit('chat_message', { message: `Refresh rate set to ${refresh_config.refresh_rate} ms. You may need to refresh` });
+            }
+        }
+        function set_max_tokens(words) {
+            if (isNaN(words[1])) {
+                socket.emit('chat_message', { message: `Invalid max tokens` });
+                return;
+            }
+            refresh_config.max_tokens = parseInt(words[1]);
+            refresh_config.max_tokens = Math.max(refresh_config.max_tokens, 1);
+            const response_message = `Max stored changes set to ${refresh_config.max_tokens}. You may need to refresh`;
+            socket.emit('chat_message', { message: response_message });
+            socket.broadcast.emit('chat_message', { message: response_message });
+        }
+        function help(words) {
+            let help_message = 'Available commands: ';
+            for (const [key, value] of Object.entries(commands)) {
+                help_message += `${value.name} (${value.description}) =-=-=-=-=-=-  `;
+            }
+            socket.emit('chat_message', { message: help_message });
+        }
+        //#endregion command functions
 
+        const commands = 
+        {
+            save: { name: 'save', min_args: 1, func: save, description: 'Save the current state. usage: save' },
+            list_users: { name: 'list_users', min_args: 1, func: list_users, description: 'List all users. usage: list_users' },
+            add_root: { name: 'add_root', min_args: 2, func: add_root, description: 'Add a user as a root user. usage: add_root <username>' },
+            remove_root: { name: 'remove_root', min_args: 2, func: remove_root, description: 'Remove a user as a root user. usage: remove_root <username>' },
+            kill_user: { name: 'kill_user', min_args: 2, func: kill_user, description: 'Remove a user. usage: kill_user <username>' },
+            set_refresh_rate: { name: 'set_refresh_rate', min_args: 2, func: set_refresh_rate, description: 'Set the refresh rate. usage: set_refresh_rate <rate>' },
+            set_max_tokens: { name: 'set_max_tokens', min_args: 2, func: set_max_tokens, description: 'Set the max tokens. usage: set_max_tokens <max_tokens>' },
+            help: { name: 'help', min_args: 1, func: help, description: 'Show this message. usage: help' },
+        }
+        if (commands[words[0]] == undefined) {
+            socket.emit('chat_message', { message: 'Invalid command' });
+            return;
+        }
+        else {
+            if (words.length < commands[words[0]].min_args) {
+                socket.emit('chat_message', { message: `Invalid usage. usage: ${commands[words[0]].description}` });
+                return;
+            }
+            commands[words[0]].func(words);
+        }
     })
 
 });
