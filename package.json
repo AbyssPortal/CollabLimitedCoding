@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "collections": "^5.1.13",
+    "express": "^4.21.2",
+    "highlight.js": "^11.11.1",
+    "js-beautify": "^1.15.4",
+    "read-write-mutexify": "^2.1.0",
+    "socket.io": "^4.8.1"
+  }
+}

@@ -1,0 +1,5 @@
+
+changes_list:
+    type: create_element, where: (location in array of the element before the one t hat was added)
+    type: edit_element, where: (-same-), to: new value
+    type: delete_element, where: (-same)

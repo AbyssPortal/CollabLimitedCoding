@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mischeavious Coding</title>
+</head>
+
+<body>
+    <link rel="stylesheet" href="styles.css">
+    <h1>Mischiveaous Collabarative Coding Game of Sorts</h1>
+
+    <div id="authSection">
+        <h2>Sign In</h2>
+        <form id="authForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="button" id="signInButton">Sign In</button>
+
+            <button type="button" id="registerButton">Register</button>
+            <script>
+                var remaining_changes = 0;
+                var next_refresh = Infinity
+                function signed_in_ui(username) {
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('signedInSection').style.display = 'block';
+                    document.getElementById('usernameDisplay').innerText = username;
+
+                    document.getElementById('changesSection').style.display = 'block';
+                    document.getElementById('remaining_changes').innerText = 'Remaining Changes: ' + remaining_changes;
+                    setTimeout(() => {
+                        setInterval(check_refreshes, 250);
+
+                    }, (next_refresh - Date.now) % 1000 + 10); // start the timer 10 seconds after the next second tick
+                    document.getElementById('tokens_home').style.display = 'block';
+                }
+                document.getElementById('signInButton').addEventListener('click', () => {
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+
+                    socket.emit('sign_in', { username, password }, (response) => {
+                        if (response.success) {
+                            // alert('Sign in successful!');
+                            remaining_changes = response.remaining_changes;
+                            next_refresh = response.next_refresh
+                            signed_in_ui(username);
+                        } else {
+                            alert('Sign in failed: ' + response.message);
+                        }
+                    });
+                });
+
+                document.getElementById('registerButton').addEventListener('click', () => {
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+
+                    socket.emit('register', { username, password }, (response) => {
+                        if (response.success) {
+                            // alert('Registration successful!');
+                            remaining_changes = response.remaining_changes;
+                            next_refresh = response.next_refresh
+                            signed_in_ui(username);
+
+                            // Additional logic for successful registration
+                        } else {
+                            alert('Registration failed: ' + response.message);
+                        }
+                    });
+                });
+
+            </script>
+        </form>
+    </div>
+    <div id="signedInSection" style="display: none;">
+        <h2>Welcome, <span id="usernameDisplay" style="color: rgb(25, 179, 36);"></span></h2>
+        <button id="signOutButton">Sign Out</button>
+
+    </div>
+
+    <div id="changesSection" style="display: none;">
+        <label id="remaining_changes">Remaining Changes: undefined</label>
+        <label>, </label>
+        <label id="next_refresh">Next Refresh: undefined</label>
+    </div>
+
+
+    <div id="tokens_home" style="display: none;">
+
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+    </script>
+    <script src="sha256.js"></script>
+    <script src="code.js"></script>
+
+
+    <form>
+        <!-- <button type="button" id="sendTokensButton">Send Tokens</button> -->
+    </form>
+</body>
+
+</html>
