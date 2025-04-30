@@ -310,6 +310,9 @@ function create_container_after(container) {
     const new_container = createTokenTextbox();
     fix_textbox_width(new_container.firstChild);
     let next_non_break = container.nextSibling;
+    if (!next_non_break) {
+        container.parentNode.appendChild(new_container);
+    }
     while (next_non_break && next_non_break.tagName === 'BR') {
         if (!next_non_break.nextSibling) {
             container.parentNode.appendChild(new_container);
