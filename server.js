@@ -35,6 +35,11 @@ console.log = ((log) => (...args) => {
     log(formatDate(Date.now()), ':', ...args);
 })(console.log);
 
+console.error = ((error) => (...args) => {
+    error(formatDate(Date.now()), ':', ...args);
+}
+)(console.error);
+
 function handle_http_request(req, res) {
     if (req.method === 'GET') {
         let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
