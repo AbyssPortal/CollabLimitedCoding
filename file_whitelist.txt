@@ -6,3 +6,4 @@ run.html
 acorn/acorn_interpreter.js
 acorn/acorn.js
 acorn/interpreter.js
+is_token.js
