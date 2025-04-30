@@ -110,7 +110,15 @@
             <br />
             <div id="chat_messages" class=".chat-container">
             </div>
-
+            <button id="clear_chat_button" >Clear Chat</button>
+            <script>
+                document.getElementById('clear_chat_button').addEventListener('click', () => {
+                    const chatMessages = document.getElementById('chat_messages');
+                    while (chatMessages.firstChild) {
+                        chatMessages.removeChild(chatMessages.firstChild);
+                    }
+                });
+            </script>
         </div>
     </div>
     <div id="root_area" style="display: none;">
