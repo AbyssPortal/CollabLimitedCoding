@@ -364,7 +364,33 @@ io.on('connection', (socket) => {
                     socket.emit('chat_message', { message: `User ${words[1]} not found` });
                 }
                 break;
+            case 'set_refresh_rate':
+                {
+                    if (isNaN(words[1])) {
+                        socket.emit('chat_message', { message: `Invalid refresh rate` });
+                        return;
+                    }
+                    refresh_config.refresh_rate = parseInt(words[1]);
+                    refresh_config.refresh_rate = Math.max(refresh_config.refresh_rate, 1000);
+                    const response_message = `Refresh rate set to ${refresh_config.refresh_rate} ms. You may need to refresh`;
+                    socket.emit('chat_message', { message: response_message });
+                    socket.broadcast.emit('chat_message', { message: `Refresh rate set to ${refresh_config.refresh_rate} ms. You may need to refresh` });
+                }
+                break;
 
+            case 'set_max_tokens':
+                {
+                    if (isNaN(words[1])) {
+                        socket.emit('chat_message', { message: `Invalid max tokens` });
+                        return;
+                    }
+                    refresh_config.max_tokens = parseInt(words[1]);
+                    refresh_config.max_tokens = Math.max(refresh_config.max_tokens, 1);
+                    const response_message = `Max stored changes set to ${refresh_config.refresh_rate} ms. You may need to refresh`;
+                    socket.emit('chat_message', { message: response_message });
+                    socket.broadcast.emit('chat_message', { message: response_message });
+                }
+                break;
             default:
                 socket.emit('chat_message', { message: 'Invalid command' });
         }
