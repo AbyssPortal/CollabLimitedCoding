@@ -13,18 +13,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
     <pre><code class="language-js" id="code_display">...</code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-
-
-    <!-- and it's easy to individually load additional languages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/js.min.js"></script>
+    <script src="acorn/acorn.js"></script>
+    <script src="acorn/interpreter.js"></script>
+
+
     <script>
+        var interpreter;
         fetch('/api/code')
             .then(response => response.json())
             .then(data => {
                 console.log('recieved:', data);
                 document.getElementById('code_display').textContent = data.code;
                 hljs.highlightAll();
-                document.getElementById('dynamic_script').innerHTML = data.code;
+                let init_func = function (interpreter, globalObject) {
+                    interpreter.setProperty(globalObject, 'print', interpreter.createNativeFunction(print));
+                    interpreter.setProperty(globalObject, 'input', interpreter.createNativeFunction(input));
+                }
+                interpreter = new Interpreter(data.code, init_func);
+                document.getElementById('runButton').addEventListener('click', () => {
+                    setInterval(() => {
+                        for (let i = 0; i < 10000; i++) {
+                            if(!interpreter.step()) {
+                                console.log('done');
+                                clearInterval(this);
+                                break;
+                            }
+                        }
+                    }, 100);
+                });
+                document.getElementById('runButton').style.display = 'block';
 
             })
             .catch(error => {
@@ -33,7 +51,8 @@
             });
     </script>
 
-    <script id='dynamic_script'></script>
+    <button id="runButton" style="display: none;">Run Code</button>
+
 
     <div id="fake_console">
         <label for="console_input">Console Input:</label>
@@ -47,21 +66,21 @@
             output.innerHTML += "<$>: " + text + '<br>'; // Add a line break
         };
 
+        var input_stack = []
+
         var input = function () {
-            const inputField = document.getElementById('console_input');
-            return new Promise((resolve) => {
-                inputField.addEventListener('keypress', (event) => {
-                    if (event.key === 'Enter') {
-                        resolve(inputField.value);
-                        inputField.value = ''; // Clear the input field
-                    }
-                });
-            });
+            if (input_stack.length === 0) {
+                return undefined;
+            }
+            const input = input_stack.pop();
+            return input;
         };
-        document.getElementById('console_submit').addEventListener('click', () => {
-            const input = document.getElementById('console_input').value;
-            const output = document.getElementById('console_output');
-            // Simulate running the code
+        const inputField = document.getElementById('console_input');
+        inputField.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                input_stack.push(inputField.value);
+                inputField.value = ''; // Clear the input field
+            }
         });
     </script>
 
