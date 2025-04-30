@@ -386,7 +386,7 @@ io.on('connection', (socket) => {
                     }
                     refresh_config.max_tokens = parseInt(words[1]);
                     refresh_config.max_tokens = Math.max(refresh_config.max_tokens, 1);
-                    const response_message = `Max stored changes set to ${refresh_config.refresh_rate} ms. You may need to refresh`;
+                    const response_message = `Max stored changes set to ${refresh_config.max_tokens}. You may need to refresh`;
                     socket.emit('chat_message', { message: response_message });
                     socket.broadcast.emit('chat_message', { message: response_message });
                 }
@@ -478,7 +478,7 @@ function saveData() {
         fs.writeFileSync(path.join(__dirname, 'tokens.json'), JSON.stringify(tokens, null, 2));
         tokens_lock.read.unlock();
         fs.writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify(Array.from(users.entries()), null, 2));
-        console.log('Data saved successfully.');
+        fs.writeFileSync(path.join(__dirname, 'refresh_config.json'), JSON.stringify(refresh_config, null, 2));
     } catch (error) {
         console.error('Error saving data:', error);
     }
