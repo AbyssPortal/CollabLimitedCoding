@@ -140,10 +140,17 @@ function createTokenTextbox(text = '', id = undefined) {
     button.textContent = '+';
     button.style.display = 'none';
 
+    const bubble = document.createElement('label');
+    bubble.className = 'speech-bubble';
+    bubble.textContent = 'foo';
+    bubble.style.display = 'none'; // Initially hidden
+
     const container = document.createElement('span');
     container.className = 'token-container';
     container.appendChild(textbox);
     container.appendChild(button);
+    container.appendChild(bubble);
+
     if (id == undefined) {
         container.id = 'token_container_' + token_increment;
         token_increment++;
@@ -159,10 +166,12 @@ function createTokenTextbox(text = '', id = undefined) {
 
     textbox.addEventListener('focus', () => {
         textbox.dataset.old_value = textbox.value;
+        const count = count_location(container);
+        socket.emit('focus_token', { where: count });
+
     });
 
     textbox.addEventListener('input', () => {
-        textbox.dataset.old_value
         fix_textbox_width(textbox);
         if (textbox.value == "DELETE") {
 
@@ -187,6 +196,10 @@ function createTokenTextbox(text = '', id = undefined) {
     textbox.addEventListener('blur', () => {
         textbox.value = textbox.dataset.old_value;
         fix_textbox_width(textbox);
+        const count = count_location(container);
+
+        socket.emit('focus_remove', { where: count });
+
     });
 
     textbox.addEventListener('keydown', (event) => {
@@ -265,11 +278,15 @@ function createTokenTextbox(text = '', id = undefined) {
     return container;
 }
 
+function get_nth_token(n) {
+    let element = tokensHome.querySelectorAll('.token-container')[n];
+    return element;
+}
 
 function interpretChange(change) {
     switch (change.type) {
         case 'create_element': {
-            let element = tokensHome.querySelector(`.token-container:nth-child(${change.where + 1})`);
+            let element = get_nth_token(change.where);
             if (element) {
                 const new_container = createTokenTextbox();
                 element.parentNode.insertBefore(new_container, element.nextSibling);
@@ -278,7 +295,7 @@ function interpretChange(change) {
             break;
 
         case 'edit_element': {
-            let element = tokensHome.querySelector(`.token-container:nth-child(${change.where + 1})`);
+            let element = get_nth_token(change.where);
             if (element) {
                 const textbox = element.querySelector('input');
                 textbox.value = change.to;
@@ -288,7 +305,7 @@ function interpretChange(change) {
             }
         }
         case 'delete_element': {
-            let element = tokensHome.querySelector(`.token-container:nth-child(${change.where + 1})`);
+            let element = get_nth_token(change.where);
             if (element) {
                 element.remove();
             }
@@ -367,3 +384,35 @@ function fix_remaining_changes_label() {
     remaining_changes_label.textContent = 'Remaining changes: ' + remaining_changes;
 
 }
+
+socket.on('focus_token', (data) => {
+    const count = data.where;
+    const container = get_nth_token(count);
+    if (container) {
+        const bubble = container.querySelector('.speech-bubble');
+        if (bubble) {
+            bubble.textContent = data.username;
+            bubble.style.display = 'block';
+            if (bubble.dataset.timeout) {
+                clearTimeout(bubble.dataset.timeout);
+            }
+            bubble.dataset.timeout =            setTimeout(() => {
+                if (bubble.textContent == data.username) {
+                    bubble.style.display = 'none';
+                }
+            }, 10000);
+
+        }
+    }
+})
+
+socket.on('focus_remove', (data) => {
+    const count = data.where;
+    const container = get_nth_token(count);
+    if (container) {
+        const bubble = container.querySelector('.speech-bubble');
+        if (bubble && bubble.textContent == data.username) {
+            bubble.style.display = 'none';
+        }
+    }
+})

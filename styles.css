@@ -6,6 +6,7 @@ body {
 }
 
 .token-container {
+  position: relative;
   display: inline-block;
   flex-wrap: wrap;
   gap: 0.5em; /* Space between tokens */
@@ -30,4 +31,20 @@ body {
 .squircle-textbox:focus {
   box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Highlight on focus */
   outline: none;
+}
+
+.speech-bubble {
+  position: absolute;
+  background-color: #cee4e6b7;
+  color: #000000;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  transform: translate(-50%, -100%);
+  top: 10px; /* Adjust to position above the textbox */
+  left: 50%; /* Center horizontally relative to the textbox */
+  pointer-events: none; /* Prevent interaction */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }

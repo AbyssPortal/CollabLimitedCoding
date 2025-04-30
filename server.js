@@ -208,6 +208,14 @@ io.on('connection', (socket) => {
         console.log('Tokens updated:', tokens);
     });
 
+    socket.on('focus_token', (data) => {
+        socket.broadcast.emit('focus_token', {where: data.where, username: socket.socket_data.username});
+    })
+
+    socket.on('focus_remove', (data) => {
+        socket.broadcast.emit('focus_remove', {where: data.where, username: socket.socket_data.username});
+
+    })
 
 
 
