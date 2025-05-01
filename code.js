@@ -350,9 +350,8 @@ function interpretChange(change) {
                 const textbox = element.querySelector('input');
                 textbox.value = change.to;
                 fix_textbox_width(textbox);
-
-
             }
+            break;
         }
         case 'delete_element': {
             let element = get_nth_token(change.where);
