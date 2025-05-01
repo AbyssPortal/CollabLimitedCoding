@@ -59,3 +59,9 @@ body {
   word-break: break-word;
   hyphens: auto;
 }
+
+.line-number {
+  color: #888;
+  font-size: 0.8em;
+  margin-right: 0.5em;
+}

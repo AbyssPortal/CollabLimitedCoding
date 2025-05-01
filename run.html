@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="styles.css">
     <h1>Mischievously coded code</h1>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    <pre><code class="language-js" id="code_display">...</code></pre>
+    <pre><code class="language-js" id="code_display" style="counter-reset: line-number;">    </code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/js.min.js"></script>
     <script src="acorn/acorn.js"></script>
@@ -24,13 +24,21 @@
             .then(response => response.json())
             .then(data => {
                 console.log('recieved:', data);
-                document.getElementById('code_display').textContent = data.code;
+                const code_display = document.getElementById('code_display');
+                code_display.textContent = data.code;
                 hljs.highlightAll();
+                code_display.innerHTML = code_display.innerHTML.split('\n').map((line, index) => `<span class="line-number">${String(index + 1).padEnd(3, ' ')}</span>${line}`).join('\n');    
                 let init_func = function (interpreter, globalObject) {
                     interpreter.setProperty(globalObject, 'print', interpreter.createNativeFunction(print));
                     interpreter.setProperty(globalObject, 'input', interpreter.createNativeFunction(input));
                 }
+                try {
                 interpreter = new Interpreter(data.code, init_func);
+                } catch (e) {
+                    console.error('Error initializing interpreter:', e);
+                    document.getElementById('errors_label').textContent = 'Error initializing interpreter: ' + e.message;
+                    return;
+                }
                 document.getElementById('runButton').addEventListener('click', () => {
                     setInterval(() => {
                         for (let i = 0; i < 10000; i++) {
@@ -53,6 +61,7 @@
     </script>
 
     <button id="runButton" style="display: none;">Run Code</button>
+    <label id="errors_label" style="color: red;"></label>
 
 
     <div id="fake_console">
