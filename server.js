@@ -215,7 +215,7 @@ io.on('connection', (socket) => {
         } else {
             if (interpretChange(data.change)) {
                 user.remaining_changes--
-                socket.broadcast.emit('update_tokens', { change: data.change });
+                socket.broadcast.emit('update_tokens', { change: data.change, old_hash: hash });
             }
             else {
                 const message = `Error processing change: ${JSON.stringify(data.change)}`;
