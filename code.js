@@ -161,9 +161,10 @@ function createTokenTextbox(text = '', id = undefined) {
 
 
     const button = document.createElement('button');
-    // button.className = 'squircle-button';
-    button.textContent = '+';
+    button.className = 'plus-button';
     button.style.display = 'none';
+    button.textContent = '+';
+
 
     const bubble = document.createElement('label');
     bubble.className = 'speech-bubble';

@@ -521,6 +521,7 @@ function saveData() {
         tokens_lock.read.unlock();
         fs.writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify(Array.from(users.entries()), null, 2));
         fs.writeFileSync(path.join(__dirname, 'refresh_config.json'), JSON.stringify(refresh_config, null, 2));
+        console.log('Data saved successfully.');
     } catch (error) {
         console.error('Error saving data:', error);
     }

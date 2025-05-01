@@ -34,6 +34,20 @@ body {
   outline: none;
 }
 
+.plus-button {
+  margin: 0em;
+  padding: 0em;
+  border: 1px solid black;
+  background-color: rgba(113, 255, 165, 0.6);
+  border-radius: 1em;
+  height: 1em;
+  width: 1em; /* Optional: Add width for a square button */
+  text-align: center; /* Center the '+' symbol */
+  line-height: 0em; /* Align '+' vertically */
+  cursor: pointer; /* Change mouse cursor on hover */
+}
+
+
 .speech-bubble {
   position: absolute;
   background-color: #cee4e6b7;
@@ -71,3 +85,18 @@ input[type="text"], textarea {
   font: inherit
 }
 
+button {
+  font: inherit;
+  margin: 0.2em; /* Add slight margin to avoid collisions */
+}
+
+a {
+  color: #007bff; /* Link color */
+  text-decoration: none; /* Remove underline */
+  padding:  0em 0.5em; /* Adjust padding for desired size */
+  border: 1px solid #ccc; /* Slight border */
+  border-radius: 0.5em; /* Creates the squircle effect */
+  background-color: #f0f0f0; /* Light background color */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+
+}
