@@ -46,7 +46,12 @@ console.error = ((error) => (...args) => {
 
 function handle_http_request(req, res) {
     if (req.method === 'GET') {
-        let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+        file_aliases = {
+            '/': 'index.html',
+            '/run': 'run.html',
+        }
+        const file_alias = file_aliases[req.url] ? file_aliases[req.url] : req.url;
+        let filePath = path.join(__dirname, file_alias);
         const extname = path.extname(filePath);
         let contentType = 'text/plain';
 
