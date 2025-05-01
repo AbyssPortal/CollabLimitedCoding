@@ -64,4 +64,10 @@ body {
   color: #888;
   font-size: 0.8em;
   margin-right: 0.5em;
+  font: inherit
 }
+
+input[type="text"], textarea {
+  font: inherit
+}
+
