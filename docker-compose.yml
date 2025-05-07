@@ -1,0 +1,10 @@
+services:
+  clc:
+    image: "voidportal/collab_limited_coding:latest"
+    container_name: clc
+    ports:
+      - 3000:3000
+    volumes:
+      - clcvol:/build
+volumes:
+  clcvol:
