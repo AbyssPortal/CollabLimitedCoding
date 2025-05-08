@@ -274,6 +274,8 @@ function createTokenTextbox(text = '', id = undefined) {
                         if (res == false) {
                             new_container.remove();
                             return;
+                        } else {
+                            finalize_container_creation(new_container);
                         }
                     })
                 }
@@ -309,6 +311,8 @@ function createTokenTextbox(text = '', id = undefined) {
                 if (res == false) {
                     new_container.remove();
                     return;
+                } else {
+                    finalize_container_creation(new_container);
                 }
             });
 
@@ -317,9 +321,20 @@ function createTokenTextbox(text = '', id = undefined) {
     return container;
 }
 
+function finalize_container_creation(container) {
+    const textbox = container.querySelector('input');
+    if (textbox) {
+        textbox.dataset.phantom = false;
+        textbox.dataset.old_value = '';
+        fix_textbox_width(textbox);
+    }
+}
+
 function create_container_after(container) {
     const new_container = createTokenTextbox();
     fix_textbox_width(new_container.firstChild);
+    new_container.firstChild.dataset.phantom = true
+
     let next_non_break = container.nextSibling;
     if (!next_non_break) {
         container.parentNode.appendChild(new_container);
@@ -349,7 +364,8 @@ function interpretChange(change) {
         case 'create_element': {
             let element = get_nth_token(change.where);
             if (element) {
-                create_container_after(element);
+                const new_container = create_container_after(element);
+                finalize_container_creation(new_container);
             }
         }
             break;
@@ -379,8 +395,9 @@ function getAllTokens() {
     const tokenElements = tokensHome.querySelectorAll('.token-container');
     tokenElements.forEach(container => {
         const textbox = container.querySelector('input');
-        if (textbox) {
+        if (textbox && textbox.dataset.phantom != 'true') { 
             tokens.push(textbox.dataset.old_value);
+            console.log('Token:', textbox.dataset.old_value);
         }
     });
     return tokens;
