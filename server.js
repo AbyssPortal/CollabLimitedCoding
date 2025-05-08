@@ -11,6 +11,9 @@ const { is_token } = require('./is_token.js')
 
 
 
+const user_file_location = '/data/users.json';
+const token_file_location = '/data/tokens.json'
+const refresh_config_file_location = '/data/refresh_config.json'
 
 
 
@@ -501,15 +504,19 @@ setInterval(() => {
 }, interval = 1000 * 60 * 15);
 // Save users and tokens on process exit
 process.on('exit', () => {
+    console.log('Process exiting...');
     saveData();
 });
 
 process.on('SIGINT', () => {
+    console.log('SIGINT received. Exiting...');
     saveData();
     process.exit();
 });
 
 process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Exiting...');
+
     saveData();
     process.exit();
 });
@@ -517,10 +524,10 @@ process.on('SIGTERM', () => {
 function saveData() {
     try {
         tokens_lock.read.lock();
-        fs.writeFileSync(path.join(__dirname, 'tokens.json'), JSON.stringify(tokens, null, 2));
+        fs.writeFileSync(token_file_location, JSON.stringify(tokens, null, 2));
         tokens_lock.read.unlock();
-        fs.writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify(Array.from(users.entries()), null, 2));
-        fs.writeFileSync(path.join(__dirname, 'refresh_config.json'), JSON.stringify(refresh_config, null, 2));
+        fs.writeFileSync(user_file_location, JSON.stringify(Array.from(users.entries()), null, 2));
+        fs.writeFileSync(refresh_config_file_location, JSON.stringify(refresh_config, null, 2));
         console.log('Data saved successfully.');
     } catch (error) {
         console.error('Error saving data:', error);
@@ -529,17 +536,25 @@ function saveData() {
 
 // Load users and tokens on startup
 try {
-
-    if (fs.existsSync(path.join(__dirname, 'tokens.json'))) {
+    console.log('Loading data...');
+    if (fs.existsSync(token_file_location)) {
         tokens_lock.write.lock();
-        tokens = JSON.parse(fs.readFileSync(path.join(__dirname, 'tokens.json')));
+        tokens = JSON.parse(fs.readFileSync(token_file_location));
         tokens_lock.write.unlock();
+    } else {
+        console.log('No token file found.');
     }
-    if (fs.existsSync(path.join(__dirname, 'users.json'))) {
-        users = new Map(JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'))));
+    if (fs.existsSync(user_file_location)) {
+        users = new Map(JSON.parse(fs.readFileSync(user_file_location)));
     }
-    if (fs.existsSync(path.join(__dirname, 'refresh_config.json'))) {
-        refresh_config = JSON.parse(fs.readFileSync(path.join(__dirname, 'refresh_config.json')));
+    else {
+        console.log('No user file found.');
+    }
+    if (fs.existsSync(refresh_config_file_location)) {
+        refresh_config = JSON.parse(fs.readFileSync(refresh_config_file_location));
+    }
+    else {
+        console.log('No refresh config file found.');
     }
     console.log('Data loaded successfully.');
 } catch (error) {

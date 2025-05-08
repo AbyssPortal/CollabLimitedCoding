@@ -5,6 +5,6 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - clcvol:/build
+      - clcvol:/data
 volumes:
   clcvol:
