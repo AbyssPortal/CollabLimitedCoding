@@ -103,7 +103,6 @@ function fetchAndDisplayTokens() {
 
 
 function try_use_change() {
-    let remaining_changes_label = document.getElementById('remaining_changes');
 
     if (remaining_changes > 0) {
         remaining_changes--;
@@ -234,40 +233,47 @@ function createTokenTextbox(text = '', id = undefined) {
                 return;
             }
             event.preventDefault();
-            let value = textbox.value;
-            textbox.value = textbox.dataset.old_value;
-            fix_textbox_width(textbox);
+            const value = textbox.value;
+            const old_value = textbox.dataset.old_value;
 
+            textbox.dataset.old_value = value;
             textbox.blur();
+            textbox.dataset.old_value = old_value;
             if (!is_token(value)) {
                 textbox.style.backgroundColor = 'rgb(255, 127, 127)';
                 setTimeout(() => {
                     textbox.style.backgroundColor = '';
                 }, 750);
+                textbox.value = textbox.dataset.old_value;
+                fix_textbox_width(textbox);
                 return;
             }
             if (!try_use_change()) {
+                textbox.value = textbox.dataset.old_value;
+                fix_textbox_width(textbox);
                 return;
             }
             const count = count_location(container);
             send_tokens_change({ type: 'edit_element', where: count, to: value }).then((res) => {
                 if (!res) {
+                    textbox.value = textbox.dataset.old_value;
+                    fix_textbox_width(textbox);
                     return;
                 }
 
                 textbox.dataset.old_value = value;
-                textbox.value = value;
-                fix_textbox_width(textbox);
 
                 console.log('Elements before this one:', count);
                 if (event.key === ' ') {
                     if (!try_use_change()) {
                         return;
                     }
-
+                    const new_container = create_container_after(container);
+                    new_container.focus();
                     send_tokens_change({ type: 'create_element', where: count }).then((res) => {
-                        if (res == true) {
-                            create_container_after(container);
+                        if (res == false) {
+                            new_container.remove();
+                            return;
                         }
                     })
                 }
@@ -295,10 +301,14 @@ function createTokenTextbox(text = '', id = undefined) {
 
         const count = count_location(container);
         console.log('Elements before this one:', count);
+        const new_container = create_container_after(container);
+        new_container.focus();
+
         send_tokens_change({ type: 'create_element', where: count })
             .then((res) => {
-                if (res == true) {
-                    create_container_after(container);
+                if (res == false) {
+                    new_container.remove();
+                    return;
                 }
             });
 
@@ -326,7 +336,7 @@ function create_container_after(container) {
     if (next_non_break) {
         container.parentNode.insertBefore(new_container, next_non_break);
     }
-    new_container.firstChild.focus();
+    return new_container
 }
 
 function get_nth_token(n) {
@@ -370,7 +380,7 @@ function getAllTokens() {
     tokenElements.forEach(container => {
         const textbox = container.querySelector('input');
         if (textbox) {
-            tokens.push(textbox.value);
+            tokens.push(textbox.dataset.old_value);
         }
     });
     return tokens;
