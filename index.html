@@ -20,9 +20,9 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" autocomplete="current-password" required>
             <br>
-            <button type="button" id="signInButton">Sign In</button>
-
-            <button type="button" id="registerButton">Register</button>
+            <button type="submit" id="signInButton">Sign In</button>
+            <input type="checkbox" id="sign_in_register_checkbox">
+            <label for="sign_in_register_checkbox">Sign In / Register</label>
             <script>
                 var remaining_changes = 0;
                 var next_refresh = Infinity
@@ -37,7 +37,32 @@
                     }, (next_refresh - Date.now) % 1000 + 10); // start the timer 10 seconds after the next second tick
                     document.getElementById('main_container').style.display = 'flex';
                 }
-                document.getElementById('signInButton').addEventListener('click', () => {
+
+                const sign_in_register_checkbox = document.getElementById('sign_in_register_checkbox');
+
+                sign_in_register_checkbox.addEventListener('change', () => {
+                    if (sign_in_register_checkbox.checked) {
+                        document.getElementById('signInButton').innerText = 'Register';
+                        document.getElementById('password').setAttribute('autocomplete', 'new-password');
+                    } else {
+                        document.getElementById('signInButton').innerText = 'Sign In';
+                        document.getElementById('password').setAttribute('autocomplete', 'current-password');
+
+                    }
+                });
+
+                document.getElementById('signInButton').addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent form submission
+                    if (sign_in_register_checkbox.checked) {
+                        register();
+                        history.pushState({ registered: true }, null, '/');
+                    } else {
+                        sign_in();
+                        history.pushState({ signed_in: true}, null, '/');
+                    }
+                });
+
+                function sign_in() {
                     const username = document.getElementById('username').value;
                     const password = document.getElementById('password').value;
 
@@ -54,9 +79,9 @@
                             alert('Sign in failed: ' + response.message);
                         }
                     });
-                });
+                }
 
-                document.getElementById('registerButton').addEventListener('click', () => {
+                function register() {
                     const username = document.getElementById('username').value;
                     const password = document.getElementById('password').value;
 
@@ -72,6 +97,10 @@
                             alert('Registration failed: ' + response.message);
                         }
                     });
+                }
+
+                document.getElementById('registerButton').addEventListener('click', () => {
+
                 });
 
             </script>
@@ -93,9 +122,9 @@
                 <label id="next_refresh">Next Refresh: undefined</label>
             </div>
             <div id="tokens_home"></div>
-            <br/>
+            <br />
             <a href="/run">Run It!</a>
-            
+
         </div>
 
         <div id="chat_room" style=" width: 25%; padding-left: 10px;">
@@ -113,7 +142,7 @@
             <br />
             <div id="chat_messages" class=".chat-container">
             </div>
-            <button id="clear_chat_button" >Clear Chat</button>
+            <button id="clear_chat_button">Clear Chat</button>
             <script>
                 document.getElementById('clear_chat_button').addEventListener('click', () => {
                     const chatMessages = document.getElementById('chat_messages');
@@ -141,17 +170,17 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-            <script>
-                const socket = io();
-            </script>
-            <script src="sha256.js"></script>
-            <script src="is_token.js"></script>
-            <script src="code.js"></script>
+    <script>
+        const socket = io();
+    </script>
+    <script src="sha256.js"></script>
+    <script src="is_token.js"></script>
+    <script src="code.js"></script>
 
 
-            <form>
-                <!-- <button type="button" id="sendTokensButton">Send Tokens</button> -->
-            </form>
+    <form>
+        <!-- <button type="button" id="sendTokensButton">Send Tokens</button> -->
+    </form>
 </body>
 
 </html>
