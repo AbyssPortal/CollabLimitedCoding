@@ -8,7 +8,7 @@ if (arg === undefined) {
   process.exit(1);
 }
 
-var users = new Map(JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'))));
+var users = new Map(JSON.parse(fs.readFileSync( '/data/users.json')));
 
 
 
@@ -21,4 +21,4 @@ if (!users.has(arg)) {
 (users.get(arg)).root = true;
 
 
-fs.writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify(Array.from(users.entries()), null, 2));
+fs.writeFileSync('/data/users.json', JSON.stringify(Array.from(users.entries()), null, 2));
