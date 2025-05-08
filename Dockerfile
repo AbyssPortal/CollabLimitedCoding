@@ -7,7 +7,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy application files
 COPY index.html styles.css code.js sha256.js run.html server.js ./
-COPY acorn/acorn_interpreter.js acorn/acorn.js acorn/interpreter.js ./
+COPY acorn/acorn_interpreter.js acorn/acorn.js acorn/interpreter.js ./acorn/
 COPY is_token.js atom-one-dark-reasonable.css ./
 COPY refresh_config.json ./
 COPY file_whitelist.txt ./
