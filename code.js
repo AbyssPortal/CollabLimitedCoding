@@ -269,7 +269,7 @@ function createTokenTextbox(text = '', id = undefined) {
                         return;
                     }
                     const new_container = create_container_after(container);
-                    new_container.focus();
+                    new_container.firstChild.focus();
                     send_tokens_change({ type: 'create_element', where: count }).then((res) => {
                         if (res == false) {
                             new_container.remove();
@@ -304,7 +304,7 @@ function createTokenTextbox(text = '', id = undefined) {
         const count = count_location(container);
         console.log('Elements before this one:', count);
         const new_container = create_container_after(container);
-        new_container.focus();
+        new_container.firstChild.focus();
 
         send_tokens_change({ type: 'create_element', where: count })
             .then((res) => {
