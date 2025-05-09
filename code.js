@@ -22,9 +22,9 @@ refresh_config = {
     'max_tokens': 10
 }
 
-fetch('/refresh_config.json').then(response => response.json()).then(data => {
-
-    refresh_config = data;
+fetch('/api/refresh_config').then(response => response.json()).then(data => {
+    console.log('recieved:', data);
+    refresh_config = data.refresh_config;
 
 }).catch(error => {
     console.error('Error fetching refresh config:', error);

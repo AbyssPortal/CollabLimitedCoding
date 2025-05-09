@@ -78,6 +78,11 @@ function handle_http_request(req, res) {
                 tokens_lock.read.unlock();
                 return;
             }
+            if (apiPath === 'refresh_config') {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 'refresh_config': refresh_config, }));
+                return;
+            }
         }
         // Set the content type based on the file extension
         switch (extname) {
