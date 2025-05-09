@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -- $ENV_ARGS 
+
 if [ "$#" -lt 1 ]; then
     exec node server.js
 else
